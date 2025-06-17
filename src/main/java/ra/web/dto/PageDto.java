@@ -5,15 +5,16 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+
 @Builder
 @Setter
 @Getter
-public class PageDto {
-//    private List<User> content; //Cacs phan tu trong trang
-    private int currentPage; // Trang hien tai
-    private long totalPages; // Tong so trang
-    private int size; // So phan tu tren moi trang
+public class PageDto<T> {
+    private List<T> content; // Các phần tử trong trang
+    private int currentPage; // Trang hiện tại
+    private long totalPages; // Tổng số trang
+    private int size; // Số phần tử trên mỗi trang
     private String keyword;
-    private String sortBy; // Cot sap xep
-    private String direction; // Huong sap xep (asc, desc)
+    private String sortBy; // Cột sắp xếp
+    private String direction; // Hướng sắp xếp (asc, desc)
 }

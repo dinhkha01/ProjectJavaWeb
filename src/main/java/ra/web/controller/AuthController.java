@@ -148,6 +148,6 @@ public class AuthController {
     // Trang chủ
     @GetMapping("/")
     public String home() {
-        return "home";
+        return "redirect:/candidate/profile";
     }
 }
