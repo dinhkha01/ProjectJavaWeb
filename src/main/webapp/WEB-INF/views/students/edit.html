@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Student</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="nav">
+        <ul>
+            <li><a href="list.html">List Students</a></li>
+            <li><a href="new.html">Add New Student</a></li>
+        </ul>
+    </div>
+    
+    <div class="container">
+        <div class="form-container">
+            <h1>Edit Student</h1>
+            
+            <form id="edit-student-form">
+                <input type="hidden" id="student-id" name="id">
+                
+                <div class="form-group">
+                    <label for="name" class="form-label">Name</label>
+                    <input type="text" id="name" name="name" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" id="email" name="email" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone" class="form-label">Phone</label>
+                    <input type="tel" id="phone" name="phone" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="address" class="form-label">Address</label>
+                    <textarea id="address" name="address" class="form-control" rows="3" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="avatar" class="form-label">Avatar</label>
+                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                        <img id="current-avatar" src="" alt="Current avatar" style="width: 100px; height: 100px; object-fit: cover; border-radius: 50%; margin-right: 15px;">
+                        <span>Current Avatar</span>
+                    </div>
+                    <input type="file" id="avatar" name="avatar" class="form-control" accept="image/*">
+                    <div id="avatar-preview" style="margin-top: 10px; display: none;">
+                        <img id="preview-img" src="" alt="New avatar preview" style="max-width: 200px; max-height: 200px;">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="birthday" class="form-label">Birthday</label>
+                    <input type="date" id="birthday" name="birthday" class="form-control" required>
+                </div>
+                
+                <div style="margin-top: 30px;">
+                    <button type="submit" class="btn btn-success">Update</button>
+                    <a href="list.html" class="btn btn-danger">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Get student ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const studentId = urlParams.get('id');
+        
+        // Load student data (in a real application, this would fetch from an API)
+        function loadStudentData() {
+            // Mock data for demonstration
+            const students = {
+                '1': {
+                    id: 1,
+                    name: 'Nguyen Van A',
+                    email: 'nguyenvana@example.com',
+                    phone: '0901234567',
+                    address: '123 Le Loi, District 1, HCMC',
+                    avatar: 'https://via.placeholder.com/100',
+                    birthday: '2000-05-15'
+                },
+                '2': {
+                    id: 2,
+                    name: 'Tran Thi B',
+                    email: 'tranthib@example.com',
+                    phone: '0909876543',
+                    address: '456 Nguyen Hue, District 1, HCMC',
+                    avatar: 'https://via.placeholder.com/100',
+                    birthday: '2001-03-22'
+                },
+                '3': {
+                    id: 3,
+                    name: 'Le Van C',
+                    email: 'levanc@example.com',
+                    phone: '0905678912',
+                    address: '789 Pham Ngu Lao, District 1, HCMC',
+                    avatar: 'https://via.placeholder.com/100',
+                    birthday: '1999-11-10'
+                }
+            };
+            
+            // If student exists, populate the form
+            if (studentId && students[studentId]) {
+                const student = students[studentId];
+                document.getElementById('student-id').value = student.id;
+                document.getElementById('name').value = student.name;
+                document.getElementById('email').value = student.email;
+                document.getElementById('phone').value = student.phone;
+                document.getElementById('address').value = student.address;
+                document.getElementById('current-avatar').src = student.avatar;
+                document.getElementById('birthday').value = student.birthday;
+            } else {
+                // Redirect to list if student not found
+                alert('Student not found!');
+                window.location.href = 'list.html';
+            }
+        }
+        
+        // Load student data on page load
+        window.addEventListener('DOMContentLoaded', loadStudentData);
+        
+        // Preview avatar before upload
+        document.getElementById('avatar').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                const previewContainer = document.getElementById('avatar-preview');
+                const previewImg = document.getElementById('preview-img');
+                
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                }
+                
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Form submission
+        document.getElementById('edit-student-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            // Collect form data
+            const formData = new FormData(this);
+            
+            // In a real application, this would send the data to the server
+            console.log('Updating student:');
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}: ${value}`);
+            }
+            
+            // Redirect back to the list page after successful submission
+            alert('Student updated successfully!');
+            window.location.href = 'list.html';
+        });
+    </script>
+</body>
+</html> 

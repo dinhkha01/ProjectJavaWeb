@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Student</title>
+    <link rel="stylesheet" th:href="@{/static/css/style.css}">
+</head>
+<body>
+    <div class="nav">
+        <ul>
+            <li><a href="list.html">List Students</a></li>
+            <li><a href="/students/new">Add New Student</a></li>
+        </ul>
+    </div>
+    
+    <div class="container">
+        <div class="form-container">
+            <h1>Add New Student</h1>
+            
+            <form id="new-student-form" action="/students/add" method="post" enctype="multipart/form-data" th:object="${student}">
+                <div class="form-group">
+                    <label for="name" class="form-label">Name</label>
+                    <input type="text" id="name" th:field="*{name}" class="form-control" >
+                    <span class="form-text" th:if="${#fields.hasErrors('name')}" th:errors="*{name}" style="color: red;"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" id="email" th:field="*{email}" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone" class="form-label">Phone</label>
+                    <input type="tel" id="phone" th:field="*{phone}" class="form-control" >
+                </div>
+                
+                <div class="form-group">
+                    <label for="address" class="form-label">Address</label>
+                    <textarea id="address" th:field="*{address}" class="form-control" rows="3" ></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="avatar" class="form-label">Avatar</label>
+                    <input type="file" id="avatar" th:field="*{file}" class="form-control" accept="image/*">
+                    <div id="avatar-preview" style="margin-top: 10px; display: none;">
+                        <img id="preview-img" src="" alt="Avatar preview" style="max-width: 200px; max-height: 200px;">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="birthday" class="form-label">Birthday</label>
+                    <input type="date" id="birthday" th:field="*{birthday}" class="form-control">
+                </div>
+                
+                <div style="margin-top: 30px;">
+                    <button type="submit" class="btn btn-success">Save</button>
+                    <a href="/students" class="btn btn-danger">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Preview avatar before upload
+        document.getElementById('avatar').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                const previewContainer = document.getElementById('avatar-preview');
+                const previewImg = document.getElementById('preview-img');
+                
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                }
+                
+                reader.readAsDataURL(file);
+            }
+        });
+
+    </script>
+
+
+</body>
+</html> 
