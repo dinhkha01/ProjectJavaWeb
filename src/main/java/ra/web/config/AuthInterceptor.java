@@ -9,9 +9,22 @@ public class AuthInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         Object userLogin = request.getSession().getAttribute("userLogin");
-        if (userLogin == null) {
-            response.sendRedirect(request.getContextPath() + "/loginForm");
-            return false; // Ngăn chặn việc tiếp tục xử lý yêu cầu
+        String requestURI = request.getRequestURI();
+
+        // Kiểm tra đường dẫn admin
+        if (requestURI.startsWith(request.getContextPath() + "/admin/")) {
+            if (userLogin == null || !"ADMIN".equals(userLogin)) {
+                response.sendRedirect(request.getContextPath() + "/login");
+                return false;
+            }
+        }
+
+        // Kiểm tra đường dẫn candidate
+        if (requestURI.startsWith(request.getContextPath() + "/candidate/")) {
+            if (userLogin == null || !"CANDIDATE".equals(userLogin)) {
+                response.sendRedirect(request.getContextPath() + "/login");
+                return false;
+            }
         }
 
         return true;

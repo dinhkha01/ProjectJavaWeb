@@ -80,6 +80,6 @@ public class WebConfig implements WebMvcConfigurer, ApplicationContextAware {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new AuthInterceptor())
-                .addPathPatterns("/admin/**") ;// Chỉ áp dụng cho các đường dẫn bắt đầu bằng /admin/
+                .addPathPatterns("/admin/**", "/candidate/**"); // Áp dụng cho cả admin và candidate
     }
 }
