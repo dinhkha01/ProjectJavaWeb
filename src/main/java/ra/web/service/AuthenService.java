@@ -34,15 +34,17 @@ public class AuthenService {
         return true;
     }
 
-    // Đăng nhập candidate
     public Candidate login(String email, String password) {
         Candidate candidate = authenDao.findByEmail(email);
-        if (candidate != null && BCrypt.checkpw(password, candidate.getPassword())) {
-            // Kiểm tra trạng thái tài khoản
-            if (!"active".equalsIgnoreCase(candidate.getStatus())) {
-                return null; // Tài khoản không active, không cho đăng nhập
+        if (candidate != null) {
+            // KIỂM TRA MẬT KHẨU BẰNG BCrypt
+            if (BCrypt.checkpw(password, candidate.getPassword())) {
+                // Kiểm tra trạng thái tài khoản
+                if (!"active".equalsIgnoreCase(candidate.getStatus())) {
+                    return null; // Tài khoản không active
+                }
+                return candidate;
             }
-            return candidate;
         }
         return null;
     }

@@ -121,21 +121,21 @@ public class AuthController {
     }
 
     // Trang profile candidate (yêu cầu đăng nhập)
-    @GetMapping("/candidate/profile")
-    public String candidateProfile(HttpSession session, Model model) {
-        Object userLogin = session.getAttribute("userLogin");
-        if (userLogin == null || !"CANDIDATE".equals(userLogin)) {
-            return "redirect:/login";
-        }
-
-        String candidateName = (String) session.getAttribute("candidateName");
-        String candidateEmail = (String) session.getAttribute("candidateEmail");
-
-        model.addAttribute("candidateName", candidateName);
-        model.addAttribute("candidateEmail", candidateEmail);
-
-        return "candidate/profile";
-    }
+//    @GetMapping("/candidate/profile")
+//    public String candidateProfile(HttpSession session, Model model) {
+//        Object userLogin = session.getAttribute("userLogin");
+//        if (userLogin == null || !"CANDIDATE".equals(userLogin)) {
+//            return "redirect:/login";
+//        }
+//
+//        String candidateName = (String) session.getAttribute("candidateName");
+//        String candidateEmail = (String) session.getAttribute("candidateEmail");
+//
+//        model.addAttribute("candidateName", candidateName);
+//        model.addAttribute("candidateEmail", candidateEmail);
+//
+//        return "candidate/profile";
+//    }
 
     // Dashboard admin (yêu cầu đăng nhập admin)
     @GetMapping("/admin/dashboard")
