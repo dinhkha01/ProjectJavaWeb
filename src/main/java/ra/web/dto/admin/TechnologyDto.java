@@ -1,4 +1,4 @@
-package ra.web.dto;
+package ra.web.dto.admin;
 
 import lombok.*;
 import ra.web.entity.Technology;

@@ -16,7 +16,6 @@ import javax.validation.constraints.Size;
 public class CandidateRegistrationDto {
 
     @NotBlank(message = "Tên không được để trống")
-    @Size(min = 100, message = "Tên không được vượt quá 100 ký tự")
     private String name;
 
     @NotBlank(message = "Email không được để trống")

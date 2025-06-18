@@ -1,4 +1,4 @@
-package ra.web.dao;
+package ra.web.dao.admin;
 
 import org.springframework.stereotype.Repository;
 import ra.web.entity.Technology;

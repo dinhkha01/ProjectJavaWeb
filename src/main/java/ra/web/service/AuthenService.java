@@ -38,6 +38,10 @@ public class AuthenService {
     public Candidate login(String email, String password) {
         Candidate candidate = authenDao.findByEmail(email);
         if (candidate != null && BCrypt.checkpw(password, candidate.getPassword())) {
+            // Kiểm tra trạng thái tài khoản
+            if (!"active".equalsIgnoreCase(candidate.getStatus())) {
+                return null; // Tài khoản không active, không cho đăng nhập
+            }
             return candidate;
         }
         return null;

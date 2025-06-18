@@ -1,11 +1,11 @@
-package ra.web.service;
+package ra.web.service.admin;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ra.web.dao.TechnologyDao;
+import ra.web.dao.admin.TechnologyDao;
 import ra.web.dto.PageDto;
-import ra.web.dto.TechnologyDto;
+import ra.web.dto.admin.TechnologyDto;
 import ra.web.entity.Technology;
 
 import java.util.List;

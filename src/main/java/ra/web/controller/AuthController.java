@@ -100,7 +100,13 @@ public class AuthController {
                 session.setAttribute("candidateEmail", candidate.getEmail());
                 return "redirect:/candidate/profile";
             } else {
-                bindingResult.rejectValue("password", "login.failed", "Email hoặc mật khẩu không chính xác");
+                // Kiểm tra xem có phải do tài khoản không active không
+                Candidate inactiveCandidate = authenService.findByEmail(loginDto.getEmail());
+                if (inactiveCandidate != null && !"active".equalsIgnoreCase(inactiveCandidate.getStatus())) {
+                    bindingResult.rejectValue("password", "login.failed", "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.");
+                } else {
+                    bindingResult.rejectValue("password", "login.failed", "Email hoặc mật khẩu không chính xác");
+                }
                 return "authen/login";
             }
         }
