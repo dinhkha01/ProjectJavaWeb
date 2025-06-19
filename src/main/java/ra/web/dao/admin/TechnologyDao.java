@@ -113,5 +113,9 @@ public class TechnologyDao {
         Query query = entityManager.createQuery(jpql);
         return (long) query.getSingleResult();
     }
+    public List<Technology> findAllActive() {
+        String jpql = "SELECT t FROM Technology t WHERE t.isDeleted = false";
+        return entityManager.createQuery(jpql, Technology.class).getResultList();
+    }
 
 }

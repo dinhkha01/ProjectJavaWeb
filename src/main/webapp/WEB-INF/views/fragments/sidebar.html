@@ -23,9 +23,10 @@
            th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/admin/candidates') ? 'active' : ''}">
             <i class="fas fa-users me-3"></i>Quản Lý Ứng Viên
         </a>
-        <a th:href="@{/admin/jobs}"
-           th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/admin/jobs') ? 'active' : ''}">
-            <i class="fas fa-briefcase me-3"></i>Quản Lý Công Việc
+        <!-- Thêm mục menu mới -->
+        <a th:href="@{/admin/positions}"
+           th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/admin/positions') ? 'active' : ''}">
+            <i class="fas fa-briefcase me-3"></i>Vị Trí Tuyển Dụng
         </a>
         <a th:href="@{/admin/applications}"
            th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/admin/applications') ? 'active' : ''}">
@@ -34,10 +35,6 @@
         <a th:href="@{/admin/technologies}"
            th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/admin/technologies') ? 'active' : ''}">
             <i class="fas fa-code me-3"></i>Công Nghệ
-        </a>
-        <a th:href="@{/admin/companies}"
-           th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/admin/companies') ? 'active' : ''}">
-            <i class="fas fa-building me-3"></i>Quản Lý Công Ty
         </a>
         <a th:href="@{/logout}" class="text-danger">
             <i class="fas fa-sign-out-alt me-3"></i>Đăng Xuất
