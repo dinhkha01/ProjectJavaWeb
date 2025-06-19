@@ -113,4 +113,5 @@ public class TechnologyDao {
         Query query = entityManager.createQuery(jpql);
         return (long) query.getSingleResult();
     }
+
 }

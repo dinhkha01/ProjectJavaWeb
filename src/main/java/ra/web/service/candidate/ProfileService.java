@@ -4,14 +4,21 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ra.web.dao.candidate.IProfileDao;
+import ra.web.dto.admin.CandidateTechnologyDto;
 import ra.web.dto.candidate.ProfileDto;
 import ra.web.entity.Candidate;
+import ra.web.entity.Technology;
+
+import java.util.Collections;
+import java.util.Set;
 
 @Service
 public class ProfileService {
 
     @Autowired
     private IProfileDao profileDao;
+    @Autowired
+    private CandidateTechnologyService technologyService;
 
     /**
      * Lấy thông tin profile theo ID
@@ -47,6 +54,27 @@ public class ProfileService {
         // Chuyển đổi DTO sang Entity và cập nhật
         Candidate candidate = profileDto.toEntity();
         return profileDao.updateProfile(candidate);
+    }
+    public Set<Technology> getCandidateTechnologies(Integer candidateId) {
+        Candidate candidate = profileDao.findById(candidateId);
+        return candidate != null ? candidate.getTechnologies() : Collections.emptySet();
+    }
+
+    public boolean updateCandidateTechnologies(CandidateTechnologyDto dto) {
+        try {
+            Candidate candidate = profileDao.findById(dto.getCandidateId());
+            if (candidate == null) {
+                return false;
+            }
+
+            Set<Technology> technologies = technologyService.findAllByIds(dto.getTechnologyIds());
+            candidate.setTechnologies(technologies);
+            profileDao.updateProfileWithTechnologies(candidate);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**

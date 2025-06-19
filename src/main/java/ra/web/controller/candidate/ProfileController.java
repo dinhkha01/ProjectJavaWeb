@@ -8,14 +8,21 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import ra.web.dto.admin.CandidateTechnologyDto;
+import ra.web.dto.admin.TechnologyDto;
 import ra.web.dto.candidate.ChangePasswordDto;
 import ra.web.dto.candidate.ProfileDto;
+import ra.web.entity.Technology;
+import ra.web.service.admin.TechnologyService;
 import ra.web.service.candidate.ProfileService;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/candidate")
@@ -43,11 +50,22 @@ public class ProfileController {
             return "redirect:/login";
         }
 
+        // Lấy danh sách công nghệ
+        Set<Technology> candidateTechnologies = profileService.getCandidateTechnologies(candidateId);
+        Set<Integer> selectedTechIds = candidateTechnologies.stream()
+                .map(Technology::getId)
+                .collect(Collectors.toSet());
+
+        // Lấy tất cả công nghệ ACTIVE
+        List<Technology> allActiveTechnologies = technologyService.findAllActiveTechnologies();
+        System.out.println("All active technologies: " + allActiveTechnologies);
+
         // Thêm vào model
         model.addAttribute("candidate", profileDto);
         model.addAttribute("candidateName", profileDto.getName());
         model.addAttribute("candidateEmail", profileDto.getEmail());
-        System.out.println("toi da lay"+profileDto.getTechnologyNames());
+        model.addAttribute("allTechnologies", allActiveTechnologies);
+        model.addAttribute("selectedTechIds", selectedTechIds);
 
         // Thêm DTO cho form cập nhật
         if (!model.containsAttribute("profileDto")) {
@@ -124,6 +142,67 @@ public class ProfileController {
             redirectAttributes.addFlashAttribute("updateSuccess", "Cập nhật thông tin thành công!");
         } else {
             redirectAttributes.addFlashAttribute("updateError", "Cập nhật thông tin thất bại!");
+        }
+
+        return "redirect:/candidate/profile";
+    }
+    @Autowired
+    private TechnologyService technologyService;
+
+    @GetMapping("/profile/technologies")
+    public String getCandidateTechnologies(HttpSession session, Model model) {
+        // Kiểm tra đăng nhập
+        Object userLogin = session.getAttribute("userLogin");
+        if (userLogin == null || !"CANDIDATE".equals(userLogin)) {
+            return "redirect:/login";
+        }
+
+        Integer candidateId = (Integer) session.getAttribute("candidateId");
+        if (candidateId == null) {
+            return "redirect:/login";
+        }
+
+        // Lấy danh sách công nghệ của candidate
+        Set<Technology> candidateTechnologies = profileService.getCandidateTechnologies(candidateId);
+        Set<Integer> selectedTechIds = candidateTechnologies.stream()
+                .map(Technology::getId)
+                .collect(Collectors.toSet());
+
+        // Lấy tất cả công nghệ ACTIVE
+        List<Technology> allActiveTechnologies = technologyService.findAllActiveTechnologies();
+
+        model.addAttribute("allTechnologies", allActiveTechnologies);
+        model.addAttribute("selectedTechIds", selectedTechIds);
+        model.addAttribute("candidateId", candidateId);
+
+        System.out.println("Danh sách công nghệ active: " + allActiveTechnologies);
+        System.out.println("Công nghệ đã chọn: " + selectedTechIds);
+
+        return "candidate/technology-fragment :: technologyContent";
+    }
+
+    @PostMapping("/profile/update-technologies")
+    public String updateCandidateTechnologies(@ModelAttribute CandidateTechnologyDto dto,
+                                              HttpSession session,
+                                              RedirectAttributes redirectAttributes) {
+        // Kiểm tra đăng nhập
+        Object userLogin = session.getAttribute("userLogin");
+        if (userLogin == null || !"CANDIDATE".equals(userLogin)) {
+            return "redirect:/login";
+        }
+
+        Integer candidateId = (Integer) session.getAttribute("candidateId");
+        if (candidateId == null) {
+            return "redirect:/login";
+        }
+
+        dto.setCandidateId(candidateId);
+        boolean success = profileService.updateCandidateTechnologies(dto);
+
+        if (success) {
+            redirectAttributes.addFlashAttribute("updateSuccess", "Cập nhật công nghệ thành công!");
+        } else {
+            redirectAttributes.addFlashAttribute("updateError", "Cập nhật công nghệ thất bại!");
         }
 
         return "redirect:/candidate/profile";

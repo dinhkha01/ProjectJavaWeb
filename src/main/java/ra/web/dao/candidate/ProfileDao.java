@@ -115,4 +115,33 @@ public class ProfileDao implements IProfileDao {
             return false;
         }
     }
+    @Override
+    @Transactional
+    public boolean updateProfileWithTechnologies(Candidate candidate) {
+        try {
+            // Lấy candidate hiện tại từ database
+            Candidate existingCandidate = entityManager.find(Candidate.class, candidate.getId());
+            if (existingCandidate == null) {
+                return false;
+            }
+
+            // Cập nhật các trường thông tin
+            existingCandidate.setName(candidate.getName());
+            existingCandidate.setEmail(candidate.getEmail());
+            existingCandidate.setPhone(candidate.getPhone());
+            existingCandidate.setExperience(candidate.getExperience());
+            existingCandidate.setGender(candidate.getGender());
+            existingCandidate.setDescription(candidate.getDescription());
+            existingCandidate.setDob(candidate.getDob());
+
+            // Cập nhật technologies
+            existingCandidate.setTechnologies(candidate.getTechnologies());
+
+            entityManager.merge(existingCandidate);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

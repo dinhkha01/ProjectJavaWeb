@@ -33,4 +33,8 @@ public interface IProfileDao {
      * Kiểm tra email đã tồn tại (trừ candidate hiện tại)
      */
     boolean existsByEmailAndNotId(String email, Integer excludeId);
+    /**
+     * Cập nhật thông tin candidate (bao gồm cả technologies)
+     */
+    boolean updateProfileWithTechnologies(Candidate candidate);
 }

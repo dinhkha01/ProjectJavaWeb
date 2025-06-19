@@ -44,6 +44,11 @@ public class TechnologyService {
                 .map(TechnologyDto::new)
                 .collect(Collectors.toList());
     }
+    public List<Technology> findAllActiveTechnologies() {
+        return technologyDao.getAllTechnologies().stream()
+                .filter(tech -> !tech.getIsDeleted())
+                .collect(Collectors.toList());
+    }
 
     // Tìm theo ID
     public TechnologyDto findById(Integer id) {
