@@ -7,6 +7,15 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/static/css/navbar.css">
   <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding-top: 70px; /* Thêm padding-top để không bị navbar che */
+      padding-bottom: 3rem;
+    }
+
+    /* Giảm kích thước card */
     .position-card {
       background: rgba(255, 255, 255, 0.95);
       border-radius: 15px;
@@ -14,6 +23,7 @@
       transition: all 0.3s ease;
       margin-bottom: 1.5rem;
       overflow: hidden;
+      height: 100%; /* Đảm bảo các card có cùng chiều cao */
     }
 
     .position-card:hover {
@@ -24,48 +34,50 @@
     .position-header {
       background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
       color: white;
-      padding: 1rem;
+      padding: 0.75rem; /* Giảm padding */
     }
 
     .position-body {
-      padding: 1.5rem;
+      padding: 1rem; /* Giảm padding */
     }
 
     .position-title {
-      font-size: 1.25rem;
+      font-size: 1.1rem; /* Giảm kích thước tiêu đề */
       font-weight: 600;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.3rem;
     }
 
     .position-salary {
       font-weight: 500;
+      font-size: 0.9rem; /* Giảm kích thước chữ */
       color: #28a745;
     }
 
     .position-exp {
       color: #6c757d;
+      font-size: 0.9rem;
     }
 
     .position-tech {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.5rem;
-      margin: 0.5rem 0;
+      gap: 0.3rem; /* Giảm khoảng cách */
+      margin: 0.3rem 0;
     }
 
     .tech-tag {
       background: #4facfe;
       color: white;
-      padding: 0.25rem 0.75rem;
+      padding: 0.2rem 0.5rem; /* Giảm padding */
       border-radius: 20px;
-      font-size: 0.875rem;
+      font-size: 0.75rem; /* Giảm kích thước chữ */
     }
 
     .position-footer {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1rem 1.5rem;
+      padding: 0.5rem 1rem; /* Giảm padding */
       background: #f8f9fa;
       border-top: 1px solid #e9ecef;
     }
@@ -73,6 +85,7 @@
     .position-expired {
       color: #dc3545;
       font-weight: 500;
+      font-size: 0.8rem; /* Giảm kích thước chữ */
     }
 
     .btn-apply {
@@ -80,8 +93,9 @@
       border: none;
       color: white;
       border-radius: 20px;
-      padding: 0.5rem 1.25rem;
+      padding: 0.3rem 0.8rem; /* Giảm padding */
       font-weight: 500;
+      font-size: 0.8rem; /* Giảm kích thước chữ */
       transition: all 0.3s ease;
     }
 
@@ -98,6 +112,10 @@
     .search-box {
       max-width: 300px;
       margin-bottom: 1.5rem;
+    }
+
+    .pagination .page-link {
+      background-color: rgba(255,255,255,0.9);
     }
   </style>
 </head>
@@ -120,7 +138,8 @@
   </div>
 
   <div class="row">
-    <div th:each="position : ${pageDto.content}" class="col-md-6">
+    <!-- Thay đổi col-md-6 thành col-md-4 để hiển thị 3 card trên một hàng -->
+    <div th:each="position : ${pageDto.content}" class="col-md-4">
       <div class="position-card">
         <div class="position-header">
           <h5 class="position-title" th:text="${position.name}"></h5>
@@ -131,7 +150,7 @@
           <div class="position-tech">
             <span th:each="tech : ${position.technologyNames}" class="tech-tag" th:text="${tech}"></span>
           </div>
-          <p th:text="${position.description}"></p>
+          <p style="font-size: 0.9rem;" th:text="${position.description}"></p>
         </div>
         <div class="position-footer">
           <span class="position-expired" th:text="'Hết hạn: ' + ${position.expiredDate}"></span>
@@ -148,19 +167,19 @@
   <nav th:if="${pageDto.totalPages > 1}">
     <ul class="pagination justify-content-center">
       <li class="page-item" th:classappend="${pageDto.currentPage == 0} ? 'disabled' : ''">
-        <a class="page-link" th:href="@{/candidate/positions?page={p}&size={s}&keyword={k}(p=${pageDto.currentPage - 1}, s=${pageDto.size}, k=${pageDto.keyword})}">
+        <a class="page-link" th:href="@{/candidate/positions(page=${pageDto.currentPage - 1}, size=${pageDto.size}, keyword=${pageDto.keyword})}">
           &laquo;
         </a>
       </li>
 
       <li th:each="i : ${#numbers.sequence(1, pageDto.totalPages)}"
-          class="page-item" th:classappend="${i} == ${pageDto.currentPage + 1} ? 'active' : ''">
-        <a class="page-link" th:href="@{/candidate/positions?page={p}&size={s}&keyword={k}(p=${i-1}, s=${pageDto.size}, k=${pageDto.keyword})}"
+          class="page-item" th:classappend="${i == pageDto.currentPage + 1} ? 'active' : ''">
+        <a class="page-link" th:href="@{/candidate/positions(page=${i+-1}, size=${pageDto.size}, keyword=${pageDto.keyword})}"
            th:text="${i}"></a>
       </li>
 
       <li class="page-item" th:classappend="${pageDto.currentPage == pageDto.totalPages - 1} ? 'disabled' : ''">
-        <a class="page-link" th:href="@{/candidate/positions?page={p}&size={s}&keyword={k}(p=${pageDto.currentPage + 1}, s=${pageDto.size}, k=${pageDto.keyword})}">
+        <a class="page-link" th:href="@{/candidate/positions(page=${pageDto.currentPage + 1}, size=${pageDto.size}, keyword=${pageDto.keyword})}">
           &raquo;
         </a>
       </li>
