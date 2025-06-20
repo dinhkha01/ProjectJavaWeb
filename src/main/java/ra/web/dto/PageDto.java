@@ -10,11 +10,25 @@ import java.util.List;
 @Setter
 @Getter
 public class PageDto<T> {
-    private List<T> content; // Các phần tử trong trang
-    private int currentPage; // Trang hiện tại
-    private long totalPages; // Tổng số trang
-    private int size; // Số phần tử trên mỗi trang
+    private List<T> content;
+    private int currentPage;
+    private long totalPages;
+    private int size;
     private String keyword;
-    private String sortBy; // Cột sắp xếp
-    private String direction; // Hướng sắp xếp (asc, desc)
+    private String sortBy;
+    private String direction;
+
+    // Thêm constructor public
+    public PageDto() {}
+
+    public PageDto(List<T> content, int currentPage, long totalPages, int size,
+                   String keyword, String sortBy, String direction) {
+        this.content = content;
+        this.currentPage = currentPage;
+        this.totalPages = totalPages;
+        this.size = size;
+        this.keyword = keyword;
+        this.sortBy = sortBy;
+        this.direction = direction;
+    }
 }

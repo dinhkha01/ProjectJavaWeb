@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Chi tiết vị trí</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/navbar.css">
+  <style>
+    .position-detail-card {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .position-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .position-title {
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .position-meta {
+      display: flex;
+      gap: 1.5rem;
+      margin: 1rem 0;
+      color: #6c757d;
+    }
+
+    .position-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .position-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #4facfe;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e9ecef;
+    }
+
+    .tech-tag {
+      display: inline-block;
+      background: #4facfe;
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      margin: 0.25rem;
+      font-size: 0.875rem;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .btn-back {
+      background: #6c757d;
+      color: white;
+      border-radius: 20px;
+      padding: 0.5rem 1.25rem;
+      font-weight: 500;
+    }
+
+    .btn-apply {
+      background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+      border: none;
+      color: white;
+      border-radius: 20px;
+      padding: 0.5rem 1.25rem;
+      font-weight: 500;
+    }
+
+    .btn-disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+<!-- Navigation Fragment -->
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<div class="container">
+  <div class="position-detail-card">
+    <div class="position-header">
+      <h1 class="position-title" th:text="${position.name}"></h1>
+      <div class="position-meta">
+        <div class="position-meta-item">
+          <i class="fas fa-money-bill-wave"></i>
+          <span th:text="${position.minSalary} + ' - ' + ${position.maxSalary}"></span>
+        </div>
+        <div class="position-meta-item">
+          <i class="fas fa-briefcase"></i>
+          <span th:text="${position.minExperience} + ' năm kinh nghiệm'"></span>
+        </div>
+        <div class="position-meta-item">
+          <i class="fas fa-calendar-times"></i>
+          <span th:text="'Hết hạn: ' + ${position.expiredDate}"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="position-section">
+      <h3 class="section-title">Mô tả công việc</h3>
+      <p th:text="${position.description}"></p>
+    </div>
+
+    <div class="position-section">
+      <h3 class="section-title">Công nghệ yêu cầu</h3>
+      <div>
+        <span th:each="tech : ${position.technologies}" class="tech-tag" th:text="${tech.name}"></span>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <a th:href="@{/candidate/positions}" class="btn btn-back">
+        <i class="fas fa-arrow-left me-2"></i>Quay lại
+      </a>
+      <a th:href="@{/candidate/positions/apply/{id}(id=${position.id})}" class="btn btn-apply" th:classappend="${applied} ? 'btn-disabled' : ''" th:if="${!applied}">
+        <i class="fas fa-paper-plane me-2"></i>Ứng tuyển ngay
+      </a>
+      <button class="btn btn-disabled" th:if="${applied}">
+        <i class="fas fa-check me-2"></i>Đã ứng tuyển
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

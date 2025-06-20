@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Danh sách vị trí tuyển dụng</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/navbar.css">
+  <style>
+    .position-card {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+
+    .position-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .position-header {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      color: white;
+      padding: 1rem;
+    }
+
+    .position-body {
+      padding: 1.5rem;
+    }
+
+    .position-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .position-salary {
+      font-weight: 500;
+      color: #28a745;
+    }
+
+    .position-exp {
+      color: #6c757d;
+    }
+
+    .position-tech {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 0.5rem 0;
+    }
+
+    .tech-tag {
+      background: #4facfe;
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.875rem;
+    }
+
+    .position-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      background: #f8f9fa;
+      border-top: 1px solid #e9ecef;
+    }
+
+    .position-expired {
+      color: #dc3545;
+      font-weight: 500;
+    }
+
+    .btn-apply {
+      background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+      border: none;
+      color: white;
+      border-radius: 20px;
+      padding: 0.5rem 1.25rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .btn-apply:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+    }
+
+    .btn-disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
+
+    .search-box {
+      max-width: 300px;
+      margin-bottom: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+<!-- Navigation Fragment -->
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<div class="container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="text-white">Danh sách vị trí tuyển dụng</h1>
+    <div class="search-box">
+      <form th:action="@{/candidate/positions}" method="get" class="d-flex">
+        <input type="text" class="form-control" name="keyword" th:value="${pageDto.keyword}"
+               placeholder="Tìm kiếm...">
+        <button class="btn btn-primary ms-2" type="submit">
+          <i class="fas fa-search"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="row">
+    <div th:each="position : ${pageDto.content}" class="col-md-6">
+      <div class="position-card">
+        <div class="position-header">
+          <h5 class="position-title" th:text="${position.name}"></h5>
+        </div>
+        <div class="position-body">
+          <p class="position-salary" th:text="'Lương: ' + ${position.minSalary} + ' - ' + ${position.maxSalary}"></p>
+          <p class="position-exp" th:text="'Kinh nghiệm: ' + ${position.minExperience} + ' năm'"></p>
+          <div class="position-tech">
+            <span th:each="tech : ${position.technologyNames}" class="tech-tag" th:text="${tech}"></span>
+          </div>
+          <p th:text="${position.description}"></p>
+        </div>
+        <div class="position-footer">
+          <span class="position-expired" th:text="'Hết hạn: ' + ${position.expiredDate}"></span>
+          <a th:href="@{/candidate/positions/{id}(id=${position.id})}" class="btn btn-apply" th:classappend="${position.applied} ? 'btn-disabled' : ''">
+            <span th:if="${!position.applied}">Ứng tuyển</span>
+            <span th:if="${position.applied}">Đã ứng tuyển</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <nav th:if="${pageDto.totalPages > 1}">
+    <ul class="pagination justify-content-center">
+      <li class="page-item" th:classappend="${pageDto.currentPage == 0} ? 'disabled' : ''">
+        <a class="page-link" th:href="@{/candidate/positions?page={p}&size={s}&keyword={k}(p=${pageDto.currentPage - 1}, s=${pageDto.size}, k=${pageDto.keyword})}">
+          &laquo;
+        </a>
+      </li>
+
+      <li th:each="i : ${#numbers.sequence(1, pageDto.totalPages)}"
+          class="page-item" th:classappend="${i} == ${pageDto.currentPage + 1} ? 'active' : ''">
+        <a class="page-link" th:href="@{/candidate/positions?page={p}&size={s}&keyword={k}(p=${i-1}, s=${pageDto.size}, k=${pageDto.keyword})}"
+           th:text="${i}"></a>
+      </li>
+
+      <li class="page-item" th:classappend="${pageDto.currentPage == pageDto.totalPages - 1} ? 'disabled' : ''">
+        <a class="page-link" th:href="@{/candidate/positions?page={p}&size={s}&keyword={k}(p=${pageDto.currentPage + 1}, s=${pageDto.size}, k=${pageDto.keyword})}">
+          &raquo;
+        </a>
+      </li>
+    </ul>
+  </nav>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
