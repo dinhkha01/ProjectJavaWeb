@@ -23,12 +23,10 @@ public class Application {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "candidateId", nullable = false)
-    @NotNull(message = "Ứng viên không được để trống")
     private Candidate candidate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recruitmentPositionId", nullable = false)
-    @NotNull(message = "Vị trí tuyển dụng không được để trống")
     private RecruitmentPosition recruitmentPosition;
 
     @Column(name = "cvUrl", nullable = false, length = 255)

@@ -20,8 +20,8 @@ INSERT INTO recruitment_position_technology (recruitmentPositionId, technologyId
 
 --Bảng Application (Đơn ứng tuyển)
 INSERT INTO application (candidateId, recruitmentPositionId, cvUrl, progress) VALUES
-                                                                                  (1, 1, 'https://drive.com/cv_nguyenkha.pdf', 'pending'),       -- Nguyễn Kha ứng Backend
-                                                                                  (1, 3, 'https://drive.com/cv_nguyenkha_full.pdf', 'handling'), -- Nguyễn Kha ứng Fullstack
-                                                                                  (3, 2, 'https://drive.com/cv_huy_fe.pdf', 'interviewing'),    -- Huy ứng Frontend
-                                                                                  (3, 4, 'https://drive.com/cv_huy_java.pdf', 'pending'),        -- Huy ứng Java Developer
-                                                                                  (3, 5, 'https://drive.com/cv_huy_js.pdf', 'done');             -- Huy ứng JavaScript Expert
+                                                                                  (1, 1, 'https://firebasestorage.googleapis.com/v0/b/khaa-4a9da.appspot.com/o/cvs%2F1733145300358-Diagram%20-%20Rikkei%20Job%20New.pdf?alt=media&token=40a9f0e1-0641-4994-b929-f1c1f4c159b1', 'pending'),
+                                                                                  (1, 3, 'https://firebasestorage.googleapis.com/v0/b/khaa-4a9da.appspot.com/o/cvs%2F1733145300358-Diagram%20-%20Rikkei%20Job%20New.pdf?alt=media&token=40a9f0e1-0641-4994-b929-f1c1f4c159b1', 'handling'),
+                                                                                  (3, 2, 'https://firebasestorage.googleapis.com/v0/b/khaa-4a9da.appspot.com/o/cvs%2F1733145300358-Diagram%20-%20Rikkei%20Job%20New.pdf?alt=media&token=40a9f0e1-0641-4994-b929-f1c1f4c159b1', 'interviewing'),
+                                                                                  (3, 4, 'https://firebasestorage.googleapis.com/v0/b/khaa-4a9da.appspot.com/o/cvs%2F1733145300358-Diagram%20-%20Rikkei%20Job%20New.pdf?alt=media&token=40a9f0e1-0641-4994-b929-f1c1f4c159b1', 'pending'),
+                                                                                  (3, 5, 'https://firebasestorage.googleapis.com/v0/b/khaa-4a9da.appspot.com/o/cvs%2F1733145300358-Diagram%20-%20Rikkei%20Job%20New.pdf?alt=media&token=40a9f0e1-0641-4994-b929-f1c1f4c159b1', 'done');

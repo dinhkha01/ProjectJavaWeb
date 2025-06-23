@@ -58,7 +58,7 @@ public class ProfileController {
 
         // Lấy tất cả công nghệ ACTIVE
         List<Technology> allActiveTechnologies = technologyService.findAllActiveTechnologies();
-        System.out.println("All active technologies: " + allActiveTechnologies);
+        System.out.println("All active technologies: " + profileDto.getTechnologyNames());
 
         // Thêm vào model
         model.addAttribute("candidate", profileDto);
