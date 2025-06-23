@@ -22,8 +22,13 @@ public class ApplicationDao implements IApplicationDao {
     @Override
     public PageDto<ApplicationDto> findAllWithPagination(int page, int size, String sortBy, String direction,
                                                          ProgressStatus progress, String interviewResult) {
-        // Build JPQL query
-        StringBuilder jpql = new StringBuilder("SELECT a FROM Application a WHERE a.destroyAt IS NULL");
+        // Build JPQL query với JOIN FETCH để load luôn candidate và position
+        StringBuilder jpql = new StringBuilder(
+                "SELECT a FROM Application a " +
+                        "JOIN FETCH a.candidate c " +
+                        "JOIN FETCH a.recruitmentPosition rp " +
+                        "WHERE a.destroyAt IS NULL"
+        );
 
         // Add progress filter
         if (progress != null) {
@@ -65,11 +70,15 @@ public class ApplicationDao implements IApplicationDao {
                 .map(ApplicationDto::new)
                 .collect(Collectors.toList());
 
-        // Create count query
-        String countJpql = jpql.toString()
-                .replace("SELECT a FROM Application a", "SELECT COUNT(a.id) FROM Application a")
-                .replace("ORDER BY a.id DESC", "")
-                .replace("ORDER BY a." + sortBy + " " + (direction.equalsIgnoreCase("desc") ? "DESC" : "ASC"), "");
+        // Create count query (không cần JOIN FETCH cho count)
+        String countJpql = "SELECT COUNT(a.id) FROM Application a WHERE a.destroyAt IS NULL";
+
+        if (progress != null) {
+            countJpql += " AND a.progress = :progress";
+        }
+        if (interviewResult != null && !interviewResult.isEmpty()) {
+            countJpql += " AND a.interviewResult = :interviewResult";
+        }
 
         TypedQuery<Long> countQuery = entityManager.createQuery(countJpql, Long.class);
 
@@ -94,7 +103,24 @@ public class ApplicationDao implements IApplicationDao {
 
     @Override
     public Application findById(Integer id) {
-        return entityManager.find(Application.class, id);
+        try {
+            // Sử dụng JOIN FETCH để load luôn candidate và position
+            String jpql = "SELECT a FROM Application a " +
+                    "JOIN FETCH a.candidate c " +
+                    "JOIN FETCH a.recruitmentPosition rp " +
+                    "WHERE a.id = :id";
+
+            TypedQuery<Application> query = entityManager.createQuery(jpql, Application.class);
+            query.setParameter("id", id);
+
+            List<Application> results = query.getResultList();
+            return results.isEmpty() ? null : results.get(0);
+
+        } catch (Exception e) {
+            System.err.println("Error in findById with JOIN FETCH: " + e.getMessage());
+            // Fallback to simple find
+            return entityManager.find(Application.class, id);
+        }
     }
 
     @Override

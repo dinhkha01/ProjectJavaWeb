@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -130,6 +131,15 @@
             padding: 1rem;
             margin-top: 0.5rem;
         }
+
+        .error-message {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+        }
     </style>
 </head>
 <body>
@@ -164,8 +174,17 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 
+    <!-- Debug Info (Remove in production) -->
+    <div class="alert alert-info" th:if="${application == null}">
+        <strong>DEBUG:</strong> Application object is NULL!
+    </div>
+
+    <div class="alert alert-warning" th:if="${application != null && application.candidate == null}">
+        <strong>DEBUG:</strong> Application candidate is NULL!
+    </div>
+
     <!-- Application Info -->
-    <div class="row">
+    <div class="row" th:if="${application != null}">
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
@@ -176,21 +195,21 @@
                         <div class="col-md-6">
                             <div class="d-flex mb-3">
                                 <span class="info-label">Ứng viên:</span>
-                                <span th:text="${application.candidate.name}"></span>
+                                <span th:text="${application.candidate != null ? application.candidate.name : 'Không có thông tin'}"></span>
                             </div>
                             <div class="d-flex mb-3">
                                 <span class="info-label">Email:</span>
-                                <span th:text="${application.candidate.email}"></span>
+                                <span th:text="${application.candidate != null ? application.candidate.email : 'Không có thông tin'}"></span>
                             </div>
                             <div class="d-flex mb-3">
                                 <span class="info-label">SĐT:</span>
-                                <span th:text="${application.candidate.phone ?: 'Chưa cập nhật'}"></span>
+                                <span th:text="${application.candidate != null && application.candidate.phone != null ? application.candidate.phone : 'Chưa cập nhật'}"></span>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="d-flex mb-3">
                                 <span class="info-label">Vị trí:</span>
-                                <span th:text="${application.recruitmentPosition.name}"></span>
+                                <span th:text="${application.recruitmentPosition != null ? application.recruitmentPosition.name : 'Không có thông tin'}"></span>
                             </div>
                             <div class="d-flex mb-3">
                                 <span class="info-label">Trạng thái:</span>
@@ -199,11 +218,12 @@
                                     <span th:case="handling" class="status-handling">Đang xử lý</span>
                                     <span th:case="interviewing" class="status-interviewing">Phỏng vấn</span>
                                     <span th:case="done" class="status-done">Hoàn thành</span>
+                                    <span th:case="*" class="badge bg-secondary">Không xác định</span>
                                 </span>
                             </div>
                             <div class="d-flex mb-3">
                                 <span class="info-label">Ngày tạo:</span>
-                                <span th:text="${#temporals.format(application.createAt, 'dd/MM/yyyy HH:mm')}"></span>
+                                <span th:text="${application.createAt != null ? #temporals.format(application.createAt, 'dd/MM/yyyy HH:mm') : 'Không có thông tin'}"></span>
                             </div>
                         </div>
                     </div>
@@ -211,9 +231,14 @@
                         <div class="col-12">
                             <div class="d-flex mb-3">
                                 <span class="info-label">CV:</span>
-                                <a th:href="${application.cvUrl}" target="_blank" class="btn btn-sm btn-primary">
+                                <a th:if="${application.cvUrl != null and !#strings.isEmpty(application.cvUrl)}"
+                                   th:href="${application.cvUrl}"
+                                   target="_blank"
+                                   class="btn btn-sm btn-primary">
                                     <i class="fas fa-file-pdf me-2"></i>Xem CV
                                 </a>
+                                <span th:if="${application.cvUrl == null or #strings.isEmpty(application.cvUrl)}"
+                                      class="text-muted">Không có CV</span>
                             </div>
                         </div>
                     </div>
@@ -221,184 +246,205 @@
             </div>
 
             <!-- Interview Info -->
-<!--            <div class="card" th:if="${application.progress.name() == 'interviewing' || application.progress.name() == 'done'}">-->
-<!--                <div class="card-header">-->
-<!--                    <h5 class="mb-0">Thông Tin Phỏng Vấn</h5>-->
-<!--                </div>-->
-<!--                <div class="card-body">-->
-<!--                    <div class="row mb-3">-->
-<!--                        <div class="col-md-6">-->
-<!--                            <div class="d-flex mb-3">-->
-<!--                                <span class="info-label">Ngày gửi thông báo:</span>-->
-<!--                                <span th:text="${#temporals.format(application.interviewRequestDate, 'dd/MM/yyyy HH:mm')}"></span>-->
-<!--                            </div>-->
-<!--                            <div class="d-flex mb-3">-->
-<!--                                <span class="info-label">Link phỏng vấn:</span>-->
-<!--                                <a th:href="${application.interviewLink}" target="_blank" th:text="${application.interviewLink}"></a>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                        <div class="col-md-6">-->
-<!--                            <div class="d-flex mb-3">-->
-<!--                                <span class="info-label">Thời gian PV:</span>-->
-<!--                                <span th:text="${#temporals.format(application.interviewTime, 'dd/MM/yyyy HH:mm')}"></span>-->
-<!--                            </div>-->
-<!--                            <div class="d-flex mb-3" th:if="${application.interviewResult}">-->
-<!--                                <span class="info-label">Kết quả:</span>-->
-<!--                                <span th:text="${application.interviewResult}"></span>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                    <div class="row" th:if="${application.interviewResultNote}">-->
-<!--                        <div class="col-12">-->
-<!--                            <div class="d-flex mb-3">-->
-<!--                                <span class="info-label">Ghi chú:</span>-->
-<!--                                <span th:text="${application.interviewResultNote}"></span>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
+            <div class="card" th:if="${application.progress != null && (application.progress.name() == 'interviewing' || application.progress.name() == 'done')}">
+                <div class="card-header">
+                    <h5 class="mb-0">Thông Tin Phỏng Vấn</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="d-flex mb-3">
+                                <span class="info-label">Ngày gửi thông báo:</span>
+                                <span th:text="${application.interviewRequestDate != null ? #temporals.format(application.interviewRequestDate, 'dd/MM/yyyy HH:mm') : 'Chưa có'}"></span>
+                            </div>
+                            <div class="d-flex mb-3">
+                                <span class="info-label">Link phỏng vấn:</span>
+                                <a th:if="${application.interviewLink != null and !#strings.isEmpty(application.interviewLink)}"
+                                   th:href="${application.interviewLink}"
+                                   target="_blank"
+                                   th:text="${application.interviewLink}"></a>
+                                <span th:if="${application.interviewLink == null or #strings.isEmpty(application.interviewLink)}"
+                                      class="text-muted">Chưa có</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex mb-3">
+                                <span class="info-label">Thời gian PV:</span>
+                                <span th:text="${application.interviewTime != null ? #temporals.format(application.interviewTime, 'dd/MM/yyyy HH:mm') : 'Chưa có'}"></span>
+                            </div>
+                            <div class="d-flex mb-3" th:if="${application.interviewResult != null and !#strings.isEmpty(application.interviewResult)}">
+                                <span class="info-label">Kết quả:</span>
+                                <span th:text="${application.interviewResult}"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" th:if="${application.interviewResultNote != null and !#strings.isEmpty(application.interviewResultNote)}">
+                        <div class="col-12">
+                            <div class="d-flex mb-3">
+                                <span class="info-label">Ghi chú:</span>
+                                <span th:text="${application.interviewResultNote}"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Application Timeline -->
-<!--            <div class="card">-->
-<!--                <div class="card-header">-->
-<!--                    <h5 class="mb-0">Lịch Sử Đơn</h5>-->
-<!--                </div>-->
-<!--                <div class="card-body">-->
-<!--                    <div class="timeline">-->
-<!--                        <div class="timeline-item">-->
-<!--                            <div class="timeline-date">-->
-<!--                                <i class="fas fa-calendar-alt me-2"></i>-->
-<!--                                <span th:text="${#temporals.format(application.createAt, 'dd/MM/yyyy HH:mm')}"></span>-->
-<!--                            </div>-->
-<!--                            <div class="timeline-content">-->
-<!--                                <strong>Đơn được tạo</strong>-->
-<!--                                <p>Ứng viên nộp đơn ứng tuyển</p>-->
-<!--                            </div>-->
-<!--                        </div>-->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Lịch Sử Đơn</h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-date">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                <span th:text="${application.createAt != null ? #temporals.format(application.createAt, 'dd/MM/yyyy HH:mm') : 'Không có thông tin'}"></span>
+                            </div>
+                            <div class="timeline-content">
+                                <strong>Đơn được tạo</strong>
+                                <p>Ứng viên nộp đơn ứng tuyển</p>
+                            </div>
+                        </div>
 
-<!--                        <div class="timeline-item" th:if="${application.progress.name() != 'pending'}">-->
-<!--                            <div class="timeline-date">-->
-<!--                                <i class="fas fa-calendar-alt me-2"></i>-->
-<!--                                <span th:text="${#temporals.format(application.updateAt, 'dd/MM/yyyy HH:mm')}"></span>-->
-<!--                            </div>-->
-<!--                            <div class="timeline-content">-->
-<!--                                <strong>Chuyển trạng thái</strong>-->
-<!--                                <p th:text="'Đơn được chuyển sang ' + ${application.progress.name()}"></p>-->
-<!--                            </div>-->
-<!--                        </div>-->
+                        <div class="timeline-item" th:if="${application.progress != null && application.progress.name() != 'pending'}">
+                            <div class="timeline-date">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                <span th:text="${application.updateAt != null ? #temporals.format(application.updateAt, 'dd/MM/yyyy HH:mm') : 'Không có thông tin'}"></span>
+                            </div>
+                            <div class="timeline-content">
+                                <strong>Chuyển trạng thái</strong>
+                                <p th:text="'Đơn được chuyển sang ' + ${application.progress.name()}"></p>
+                            </div>
+                        </div>
 
-<!--                        <div class="timeline-item" th:if="${application.interviewRequestDate}">-->
-<!--                            <div class="timeline-date">-->
-<!--                                <i class="fas fa-calendar-alt me-2"></i>-->
-<!--                                <span th:text="${#temporals.format(application.interviewRequestDate, 'dd/MM/yyyy HH:mm')}"></span>-->
-<!--                            </div>-->
-<!--                            <div class="timeline-content">-->
-<!--                                <strong>Gửi thông báo phỏng vấn</strong>-->
-<!--                                <p>Đã gửi thông tin phỏng vấn cho ứng viên</p>-->
-<!--                            </div>-->
-<!--                        </div>-->
+                        <div class="timeline-item" th:if="${application.interviewRequestDate != null}">
+                            <div class="timeline-date">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                <span th:text="${#temporals.format(application.interviewRequestDate, 'dd/MM/yyyy HH:mm')}"></span>
+                            </div>
+                            <div class="timeline-content">
+                                <strong>Gửi thông báo phỏng vấn</strong>
+                                <p>Đã gửi thông tin phỏng vấn cho ứng viên</p>
+                            </div>
+                        </div>
 
-<!--                        <div class="timeline-item" th:if="${application.interviewResult}">-->
-<!--                            <div class="timeline-date">-->
-<!--                                <i class="fas fa-calendar-alt me-2"></i>-->
-<!--                                <span th:text="${#temporals.format(application.updateAt, 'dd/MM/yyyy HH:mm')}"></span>-->
-<!--                            </div>-->
-<!--                            <div class="timeline-content">-->
-<!--                                <strong>Cập nhật kết quả</strong>-->
-<!--                                <p th:text="'Kết quả: ' + ${application.interviewResult}"></p>-->
-<!--                                <p th:if="${application.interviewResultNote}" th:text="${application.interviewResultNote}"></p>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
+                        <div class="timeline-item" th:if="${application.interviewResult != null and !#strings.isEmpty(application.interviewResult)}">
+                            <div class="timeline-date">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                <span th:text="${application.updateAt != null ? #temporals.format(application.updateAt, 'dd/MM/yyyy HH:mm') : 'Không có thông tin'}"></span>
+                            </div>
+                            <div class="timeline-content">
+                                <strong>Cập nhật kết quả</strong>
+                                <p th:text="'Kết quả: ' + ${application.interviewResult}"></p>
+                                <p th:if="${application.interviewResultNote != null and !#strings.isEmpty(application.interviewResultNote)}" th:text="${application.interviewResultNote}"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Action Panel -->
-<!--        <div class="col-md-4">-->
-<!--            &lt;!&ndash; Move to Interviewing (for handling status) &ndash;&gt;-->
-<!--            <div class="card mb-4" th:if="${application.progress.name() == 'handling'}">-->
-<!--                <div class="card-header">-->
-<!--                    <h5 class="mb-0">Chuyển Sang Phỏng Vấn</h5>-->
-<!--                </div>-->
-<!--                <div class="card-body">-->
-<!--                    <form th:action="@{/admin/applications/interview/{id}(id=${application.id})}" method="post">-->
-<!--                        <div class="mb-3">-->
-<!--                            <label class="form-label">Ngày gửi thông báo</label>-->
-<!--                            <input type="datetime-local" class="form-control" name="interviewRequestDate" required>-->
-<!--                        </div>-->
-<!--                        <div class="mb-3">-->
-<!--                            <label class="form-label">Link phỏng vấn</label>-->
-<!--                            <input type="url" class="form-control" name="interviewLink" required>-->
-<!--                        </div>-->
-<!--                        <div class="mb-3">-->
-<!--                            <label class="form-label">Thời gian phỏng vấn</label>-->
-<!--                            <input type="datetime-local" class="form-control" name="interviewTime" required>-->
-<!--                        </div>-->
-<!--                        <button type="submit" class="btn btn-primary w-100 action-btn">-->
-<!--                            <i class="fas fa-user-tie me-2"></i>Chuyển Sang Phỏng Vấn-->
-<!--                        </button>-->
-<!--                    </form>-->
-<!--                </div>-->
-<!--            </div>-->
+        <div class="col-md-4">
+            <!-- Move to Interviewing (for handling status) -->
+            <div class="card mb-4" th:if="${application.progress != null && application.progress.name() == 'handling'}">
+                <div class="card-header">
+                    <h5 class="mb-0">Chuyển Sang Phỏng Vấn</h5>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/admin/applications/interview/{id}(id=${application.id})}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label">Ngày gửi thông báo</label>
+                            <input type="datetime-local" class="form-control" name="interviewRequestDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Link phỏng vấn</label>
+                            <input type="url" class="form-control" name="interviewLink" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Thời gian phỏng vấn</label>
+                            <input type="datetime-local" class="form-control" name="interviewTime" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 action-btn">
+                            <i class="fas fa-user-tie me-2"></i>Chuyển Sang Phỏng Vấn
+                        </button>
+                    </form>
+                </div>
+            </div>
 
             <!-- Update Result (for interviewing status) -->
-<!--            <div class="card mb-4" th:if="${application.progress.name() == 'interviewing'}">-->
-<!--                <div class="card-header">-->
-<!--                    <h5 class="mb-0">Cập Nhật Kết Quả</h5>-->
-<!--                </div>-->
-<!--                <div class="card-body">-->
-<!--                    <form th:action="@{/admin/applications/result/{id}(id=${application.id})}" method="post">-->
-<!--                        <div class="mb-3">-->
-<!--                            <label class="form-label">Kết quả</label>-->
-<!--                            <select class="form-select" name="result" required>-->
-<!--                                <option value="">&#45;&#45; Chọn kết quả &#45;&#45;</option>-->
-<!--                                <option value="Đậu">Đậu</option>-->
-<!--                                <option value="Rớt">Rớt</option>-->
-<!--                                <option value="Dự bị">Dự bị</option>-->
-<!--                            </select>-->
-<!--                        </div>-->
-<!--                        <div class="mb-3">-->
-<!--                            <label class="form-label">Ghi chú</label>-->
-<!--                            <textarea class="form-control" name="note" rows="3"></textarea>-->
-<!--                        </div>-->
-<!--                        <button type="submit" class="btn btn-success w-100 action-btn">-->
-<!--                            <i class="fas fa-check-circle me-2"></i>Cập Nhật Kết Quả-->
-<!--                        </button>-->
-<!--                    </form>-->
-<!--                </div>-->
-<!--            </div>-->
+            <div class="card mb-4" th:if="${application.progress != null && application.progress.name() == 'interviewing'}">
+                <div class="card-header">
+                    <h5 class="mb-0">Cập Nhật Kết Quả</h5>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/admin/applications/result/{id}(id=${application.id})}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label">Kết quả</label>
+                            <select class="form-select" name="result" required>
+                                <option value="">-- Chọn kết quả --</option>
+                                <option value="Đậu">Đậu</option>
+                                <option value="Rớt">Rớt</option>
+                                <option value="Dự bị">Dự bị</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Ghi chú</label>
+                            <textarea class="form-control" name="note" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 action-btn">
+                            <i class="fas fa-check-circle me-2"></i>Cập Nhật Kết Quả
+                        </button>
+                    </form>
+                </div>
+            </div>
 
             <!-- Cancel Application -->
-<!--            <div class="card" th:if="${application.destroyAt == null}">-->
-<!--                <div class="card-header bg-danger text-white">-->
-<!--                    <h5 class="mb-0">Huỷ Đơn Ứng Tuyển</h5>-->
-<!--                </div>-->
-<!--                <div class="card-body">-->
-<!--                    <form th:action="@{/admin/applications/cancel/{id}(id=${application.id})}" method="post">-->
-<!--                        <div class="mb-3">-->
-<!--                            <label class="form-label">Lý do huỷ</label>-->
-<!--                            <textarea class="form-control" name="reason" rows="3" required></textarea>-->
-<!--                        </div>-->
-<!--                        <button type="submit" class="btn btn-danger w-100 action-btn">-->
-<!--                            <i class="fas fa-times me-2"></i>Huỷ Đơn Ứng Tuyển-->
-<!--                        </button>-->
-<!--                    </form>-->
-<!--                </div>-->
-<!--            </div>-->
+            <div class="card" th:if="${application.destroyAt == null}">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Huỷ Đơn Ứng Tuyển</h5>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/admin/applications/cancel/{id}(id=${application.id})}" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn huỷ đơn ứng tuyển này?')">
+                        <div class="mb-3">
+                            <label class="form-label">Lý do huỷ</label>
+                            <textarea class="form-control" name="reason" rows="3" required placeholder="Nhập lý do huỷ đơn ứng tuyển..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-danger w-100 action-btn">
+                            <i class="fas fa-times me-2"></i>Huỷ Đơn Ứng Tuyển
+                        </button>
+                    </form>
+                </div>
+            </div>
 
             <!-- Application Status (for done status) -->
-<!--            <div class="card" th:if="${application.progress.name() == 'done'}">-->
-<!--                <div class="card-header bg-success text-white">-->
-<!--                    <h5 class="mb-0">Trạng Thái Đơn</h5>-->
-<!--                </div>-->
-<!--                <div class="card-body text-center">-->
-<!--                    <i class="fas fa-check-circle fa-4x text-success mb-3"></i>-->
-<!--                    <h5>Đơn đã hoàn thành</h5>-->
-<!--                    <p class="mb-0" th:text="'Kết quả: ' + ${application.interviewResult}"></p>-->
-<!--                </div>-->
-<!--            </div>-->
+            <div class="card" th:if="${application.progress != null && application.progress.name() == 'done'}">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Trạng Thái Đơn</h5>
+                </div>
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                    <h5>Đơn đã hoàn thành</h5>
+                    <p class="mb-0" th:if="${application.interviewResult != null and !#strings.isEmpty(application.interviewResult)}" th:text="'Kết quả: ' + ${application.interviewResult}"></p>
+                    <p class="mb-0" th:if="${application.interviewResult == null or #strings.isEmpty(application.interviewResult)}">Chưa có kết quả</p>
+                </div>
+            </div>
+
+            <!-- Cancelled Status -->
+            <div class="card" th:if="${application.destroyAt != null}">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Đơn Đã Huỷ</h5>
+                </div>
+                <div class="card-body text-center">
+                    <i class="fas fa-times-circle fa-4x text-danger mb-3"></i>
+                    <h5>Đơn đã bị huỷ</h5>
+                    <p class="mb-2"><strong>Ngày huỷ:</strong> <span th:text="${#temporals.format(application.destroyAt, 'dd/MM/yyyy HH:mm')}"></span></p>
+                    <p class="mb-0" th:if="${application.destroyReason != null and !#strings.isEmpty(application.destroyReason)}">
+                        <strong>Lý do:</strong> <span th:text="${application.destroyReason}"></span>
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -410,6 +456,17 @@
         const sidebar = document.querySelector('.sidebar');
         sidebar.classList.toggle('show');
     }
+
+    // Auto-hide alerts after 5 seconds
+    document.addEventListener('DOMContentLoaded', function() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+            setTimeout(function() {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            }, 5000);
+        });
+    });
 </script>
 </body>
 </html>

@@ -343,7 +343,7 @@
                                 <i class="fas fa-eye"></i>
                             </a>
                             <a th:if="${app.destroyAt == null}"
-                               th:href="@{/admin/applications/cancel/{id}(id=${app.id})}"
+                               th:href="@{/admin/applications/cancel/{id}(id=${app.id}, reason='Hủy bởi quản trị viên')}"
                                class="btn btn-sm btn-danger"
                                onclick="return confirm('Bạn chắc chắn muốn huỷ đơn này?')">
                                 <i class="fas fa-times"></i>

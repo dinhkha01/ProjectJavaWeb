@@ -24,7 +24,7 @@ public class ApplicationController {
     @GetMapping
     public String listApplications(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "5") int size,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "desc") String direction,
             @RequestParam(required = false) ProgressStatus progress,
@@ -43,25 +43,59 @@ public class ApplicationController {
     }
 
     @GetMapping("/view/{id}")
-    @Transactional
+    @Transactional(readOnly = true) // Thêm readOnly = true để tối ưu
     public String viewApplication(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
-        Application application = applicationService.findById(id);
-        if (application == null || application.getDestroyAt() != null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Đơn ứng tuyển không tồn tại hoặc đã bị huỷ");
+        try {
+            Application application = applicationService.findById(id);
+
+            // Kiểm tra null và validation
+            if (application == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Đơn ứng tuyển không tồn tại");
+                return "redirect:/admin/applications";
+            }
+
+            if (application.getDestroyAt() != null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Đơn ứng tuyển đã bị huỷ");
+                return "redirect:/admin/applications";
+            }
+
+            // Debug logging
+            System.out.println("Application ID: " + application.getId());
+            System.out.println("Application Progress: " + application.getProgress());
+
+            // Kiểm tra candidate và position có null không
+            if (application.getCandidate() != null) {
+                System.out.println("Candidate Name: " + application.getCandidate().getName());
+                System.out.println("Candidate Email: " + application.getCandidate().getEmail());
+            } else {
+                System.out.println("Candidate is NULL!");
+            }
+
+            if (application.getRecruitmentPosition() != null) {
+                System.out.println("Position Name: " + application.getRecruitmentPosition().getName());
+            } else {
+                System.out.println("RecruitmentPosition is NULL!");
+            }
+
+            // Cập nhật trạng thái nếu cần
+            if (application.getProgress() == ProgressStatus.pending) {
+                applicationService.viewApplication(id);
+                // Refresh lại object sau khi update
+                application = applicationService.findById(id);
+            }
+
+            model.addAttribute("application", application);
+            return "admin/application/view";
+
+        } catch (Exception e) {
+            System.err.println("Error in viewApplication: " + e.getMessage());
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi tải dữ liệu đơn ứng tuyển");
             return "redirect:/admin/applications";
         }
-
-
-        if (application.getProgress() == ProgressStatus.pending) {
-            applicationService.viewApplication(id);
-        }
-
-        model.addAttribute("application", application);
-        System.out.println("Application: " + application.getCandidate().getName() +" ---- "+application.getProgress());
-        return "admin/application/view";
     }
 
-    @PostMapping("/cancel/{id}")
+    @GetMapping("/cancel/{id}")
     public String cancelApplication(
             @PathVariable Integer id,
             @RequestParam String reason,

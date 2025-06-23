@@ -24,15 +24,36 @@ public class ApplicationService {
         return applicationDao.findAllWithPagination(page, size, sortBy, direction, progress, interviewResult);
     }
 
+    @Transactional(readOnly = true)
     public Application findById(Integer id) {
         Application application = applicationDao.findById(id);
         if (application != null) {
-            // Khởi tạo dữ liệu lazy
-            Hibernate.initialize(application.getCandidate());
-            Hibernate.initialize(application.getRecruitmentPosition());
+            // Khởi tạo dữ liệu lazy một cách an toàn
+            try {
+                Hibernate.initialize(application.getCandidate());
+                Hibernate.initialize(application.getRecruitmentPosition());
+
+                // Đảm bảo các thuộc tính cần thiết được load
+                if (application.getCandidate() != null) {
+                    // Force load candidate properties
+                    application.getCandidate().getName();
+                    application.getCandidate().getEmail();
+                    application.getCandidate().getPhone();
+                }
+
+                if (application.getRecruitmentPosition() != null) {
+                    // Force load position properties
+                    application.getRecruitmentPosition().getName();
+                }
+
+            } catch (Exception e) {
+                System.err.println("Error initializing lazy properties: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
         return application;
     }
+
     public boolean cancelApplication(Integer id, String reason) {
         return applicationDao.cancelApplication(id, reason);
     }
