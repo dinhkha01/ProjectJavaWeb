@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Applications</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/navbar.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-top: 70px;
+            padding-bottom: 3rem;
+        }
+
+        .applications-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            margin: 2rem auto;
+            max-width: 1200px;
+            overflow: hidden;
+            padding: 2rem;
+        }
+
+        .application-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .application-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-handling {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .status-interviewing {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-done {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .btn-custom {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border: none;
+            color: white;
+            padding: 0.5rem 1.25rem;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+            color: white;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .page-item.active .page-link {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-color: transparent;
+        }
+
+        .page-link {
+            color: #4facfe;
+            margin: 0 5px;
+            border-radius: 10px !important;
+        }
+
+        .page-link:hover {
+            color: #00f2fe;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+<!-- Navigation Fragment -->
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<!-- Flash Messages -->
+<div class="container mt-3">
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+</div>
+
+<div class="container">
+    <div class="applications-container">
+        <h1><i class="fas fa-file-alt me-2"></i>My Applications</h1>
+
+        <div th:if="${applications.content.empty}">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>You haven't applied to any positions yet.
+            </div>
+        </div>
+
+        <div th:unless="${applications.content.empty}">
+
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Position</th>
+                        <th>Status</th>
+                        <th>Applied Date</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="app : ${applications.content}">
+                        <td th:text="${app.positionName}"></td>
+                        <td>
+                                <span th:switch="${app.progress.name()}" class="status-badge">
+                                    <span th:case="pending" class="status-pending">Pending</span>
+                                    <span th:case="handling" class="status-handling">Handling</span>
+                                    <span th:case="interviewing" class="status-interviewing">Interviewing</span>
+                                    <span th:case="done" class="status-done">Done</span>
+                                </span>
+                        </td>
+                        <td th:text="${app.createAt}"></td>
+                        <td>
+                            <a th:href="@{/candidate/applications/{id}(id=${app.id})}" class="btn btn-custom btn-sm">
+                                <i class="fas fa-eye me-1"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination">
+                <ul class="pagination">
+                    <li class="page-item" th:classappend="${applications.currentPage == 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{/candidate/applications(page=1)}">First</a>
+                    </li>
+                    <li class="page-item" th:classappend="${applications.currentPage == 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{/candidate/applications(page=${applications.currentPage - 1})}">Previous</a>
+                    </li>
+
+                    <li th:each="i : ${#numbers.sequence(1, applications.totalPages)}"
+                        class="page-item" th:classappend="${i == applications.currentPage} ? 'active'">
+                        <a class="page-link" th:href="@{/candidate/applications(page=${i})}" th:text="${i}"></a>
+                    </li>
+
+                    <li class="page-item" th:classappend="${applications.currentPage == applications.totalPages} ? 'disabled'">
+                        <a class="page-link" th:href="@{/candidate/applications(page=${applications.currentPage + 1})}">Next</a>
+                    </li>
+                    <li class="page-item" th:classappend="${applications.currentPage == applications.totalPages} ? 'disabled'">
+                        <a class="page-link" th:href="@{/candidate/applications(page=${applications.totalPages})}">Last</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                new bootstrap.Alert(alert).close();
+            });
+        }, 5000);
+    });
+</script>
+</body>
+</html>

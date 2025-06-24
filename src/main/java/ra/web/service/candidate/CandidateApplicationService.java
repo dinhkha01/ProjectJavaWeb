@@ -1,41 +1,44 @@
+// CandidateApplicationService.java
 package ra.web.service.candidate;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ra.web.dao.candidate.CandidateApplicationDao;
+import ra.web.dao.candidate.IApplicationDao;
+import ra.web.dto.PageDto;
+import ra.web.dto.candidate.CandidateApplicationDto;
 import ra.web.entity.Application;
-import ra.web.entity.Candidate;
-import ra.web.entity.RecruitmentPosition;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
+@Transactional
 public class CandidateApplicationService {
+    private final IApplicationDao applicationDao;
+    @Transactional(readOnly = true)
+    public PageDto<CandidateApplicationDto> getApplications(Integer candidateId, int page, int size) {
+        PageDto<Application> applicationPage = applicationDao.findByCandidateId(candidateId, page, size);
 
-    @Autowired
-    private CandidateApplicationDao applicationDao;
+        List<CandidateApplicationDto> content = applicationPage.getContent().stream()
+                .map(CandidateApplicationDto::fromEntity)
+                .collect(Collectors.toList());
 
-    @Transactional
-    public void apply(Integer candidateId, Integer positionId, String cvUrl) {
-        // Kiểm tra xem đã apply chưa
-        if (applicationDao.existsByCandidateAndPosition(candidateId, positionId)) {
-            throw new RuntimeException("Bạn đã nộp đơn cho vị trí này");
-        }
-
-        // Tạo mới Application
-        Application application = new Application();
-        Candidate candidate = new Candidate();
-        candidate.setId(candidateId);
-        application.setCandidate(candidate);
-
-        RecruitmentPosition position = new RecruitmentPosition();
-        position.setId(positionId);
-        application.setRecruitmentPosition(position);
-
-        application.setCvUrl(cvUrl);
-        applicationDao.save(application);
+        return PageDto.<CandidateApplicationDto>builder()
+                .content(content)
+                .currentPage(applicationPage.getCurrentPage())
+                .totalPages(applicationPage.getTotalPages())
+                .size(applicationPage.getSize())
+                .build();
     }
 
-    public boolean isApplied(Integer candidateId, Integer positionId) {
-        return applicationDao.existsByCandidateAndPosition(candidateId, positionId);
+    public CandidateApplicationDto getApplicationDetails(Integer applicationId, Integer candidateId) {
+        Application application = applicationDao.findByIdAndCandidateId(applicationId, candidateId);
+        return CandidateApplicationDto.fromEntity(application);
+    }
+
+    public void confirmInterview(Integer applicationId, Integer candidateId, boolean isConfirmed, String response) {
+        applicationDao.updateInterviewConfirmation(applicationId, isConfirmed, response);
     }
 }

@@ -1,29 +1,66 @@
+// CandidateApplicationDao.java
 package ra.web.dao.candidate;
 
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
+import ra.web.dto.PageDto;
 import ra.web.entity.Application;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
+import java.util.List;
 
 @Repository
 public class CandidateApplicationDao implements IApplicationDao {
 
     @PersistenceContext
     private EntityManager entityManager;
-    @Transactional
-    public void save(Application application) {
-        entityManager.persist(application);
+
+    @Override
+    public PageDto<Application> findByCandidateId(Integer candidateId, int page, int size) {
+        // Count query (giữ nguyên)
+        String countQueryStr = "SELECT COUNT(a) FROM Application a WHERE a.candidate.id = :candidateId";
+        TypedQuery<Long> countQuery = entityManager.createQuery(countQueryStr, Long.class);
+        countQuery.setParameter("candidateId", candidateId);
+        long totalItems = countQuery.getSingleResult();
+        long totalPages = (totalItems + size - 1) / size;
+
+        // Sửa query chính để JOIN FETCH dữ liệu quan hệ
+        String queryStr = "SELECT a FROM Application a " +
+                "LEFT JOIN FETCH a.recruitmentPosition " +
+                "WHERE a.candidate.id = :candidateId " +
+                "ORDER BY a.createAt DESC";
+        TypedQuery<Application> query = entityManager.createQuery(queryStr, Application.class);
+        query.setParameter("candidateId", candidateId);
+        query.setFirstResult((page - 1) * size);
+        query.setMaxResults(size);
+
+        List<Application> applications = query.getResultList();
+
+        return PageDto.<Application>builder()
+                .content(applications)
+                .currentPage(page)
+                .totalPages(totalPages)
+                .size(size)
+                .build();
     }
 
-    public boolean existsByCandidateAndPosition(Integer candidateId, Integer positionId) {
-        String jpql = "SELECT COUNT(a) FROM Application a " +
-                "WHERE a.candidate.id = :candidateId AND a.recruitmentPosition.id = :positionId";
-        TypedQuery<Long> query = entityManager.createQuery(jpql, Long.class);
+    @Override
+    public Application findByIdAndCandidateId(Integer id, Integer candidateId) {
+        String queryStr = "SELECT a FROM Application a WHERE a.id = :id AND a.candidate.id = :candidateId";
+        TypedQuery<Application> query = entityManager.createQuery(queryStr, Application.class);
+        query.setParameter("id", id);
         query.setParameter("candidateId", candidateId);
-        query.setParameter("positionId", positionId);
-        return query.getSingleResult() > 0;
+        return query.getSingleResult();
+    }
+
+    @Override
+    public void updateInterviewConfirmation(Integer id, boolean isConfirmed, String candidateResponse) {
+        Application application = entityManager.find(Application.class, id);
+        if (application != null) {
+            application.setInterviewRequestResult(isConfirmed ? "Confirmed" : "Rejected");
+            application.setInterviewResultNote(candidateResponse);
+            entityManager.merge(application);
+        }
     }
 }

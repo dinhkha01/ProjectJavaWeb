@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Details</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/navbar.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-top: 70px;
+            padding-bottom: 3rem;
+        }
+
+        .detail-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            margin: 2rem auto;
+            max-width: 1000px;
+            overflow: hidden;
+            padding: 2rem;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: 40%;
+        }
+
+        .info-value {
+            color: #333;
+            font-weight: 500;
+            width: 60%;
+            text-align: right;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-handling {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .status-interviewing {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-done {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .btn-custom {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border: none;
+            color: white;
+            padding: 0.5rem 1.25rem;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+            color: white;
+        }
+
+        .btn-outline-custom {
+            border: 2px solid #4facfe;
+            color: #4facfe;
+            padding: 0.5rem 1.25rem;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-custom:hover {
+            background: #4facfe;
+            color: white;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        .interview-confirmation {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border-left: 5px solid #4facfe;
+        }
+    </style>
+</head>
+<body>
+<!-- Navigation Fragment -->
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<!-- Flash Messages -->
+<div class="container mt-3">
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+</div>
+
+<div class="container">
+    <div class="detail-container">
+        <a href="/candidate/applications" class="btn btn-outline-custom mb-3">
+            <i class="fas fa-arrow-left me-1"></i> Back to Applications
+        </a>
+
+        <h1><i class="fas fa-file-alt me-2"></i>Application Details</h1>
+
+        <div class="info-card">
+            <div class="info-row">
+                <span class="info-label">
+                    <i class="fas fa-briefcase text-primary"></i>Position
+                </span>
+                <span class="info-value" th:text="${application.positionName}"></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">
+                    <i class="fas fa-info-circle text-primary"></i>Status
+                </span>
+                <span class="info-value">
+                    <span th:switch="${application.progress}" class="status-badge">
+                        <span th:case="pending" class="status-pending">Pending</span>
+                        <span th:case="handling" class="status-handling">Handling</span>
+                        <span th:case="interviewing" class="status-interviewing">Interviewing</span>
+                        <span th:case="done" class="status-done">Done</span>
+                    </span>
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">
+                    <i class="fas fa-calendar text-primary"></i>Applied Date
+                </span>
+                <span class="info-value" th:text="${#temporals.format(application.createAt, 'dd/MM/yyyy HH:mm')}"></span>
+            </div>
+        </div>
+
+        <div th:if="${application.interviewTime != null}" class="info-card">
+            <h5><i class="fas fa-calendar-check me-2"></i>Interview Information</h5>
+            <div class="info-row">
+                <span class="info-label">
+                    <i class="fas fa-clock text-primary"></i>Interview Time
+                </span>
+                <span class="info-value" th:text="${#temporals.format(application.interviewTime, 'dd/MM/yyyy HH:mm')}"></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">
+                    <i class="fas fa-link text-primary"></i>Interview Link
+                </span>
+                <span class="info-value">
+                    <a th:if="${application.interviewLink}" th:href="${application.interviewLink}" target="_blank" th:text="${application.interviewLink}"></a>
+                    <span th:unless="${application.interviewLink}">Not provided yet</span>
+                </span>
+            </div>
+            <div th:if="${application.interviewRequestResult != null}" class="info-row">
+                <span class="info-label">
+                    <i class="fas fa-check-circle text-primary"></i>Your Response
+                </span>
+                <span class="info-value" th:text="${application.interviewRequestResult}"></span>
+            </div>
+        </div>
+
+        <div th:if="${application.canConfirmInterview}" class="interview-confirmation">
+            <h5><i class="fas fa-question-circle me-2"></i>Interview Confirmation</h5>
+            <p>You have been invited for an interview. Please confirm your availability:</p>
+
+            <form th:action="@{/candidate/applications/{id}/confirm-interview(id=${application.id})}" method="post" class="mt-3">
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="isConfirmed" id="confirmYes" value="true" required>
+                        <label class="form-check-label" for="confirmYes">
+                            <i class="fas fa-check text-success me-1"></i> I will attend the interview
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="isConfirmed" id="confirmNo" value="false">
+                        <label class="form-check-label" for="confirmNo">
+                            <i class="fas fa-times text-danger me-1"></i> I cannot attend the interview
+                        </label>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="responseNote" class="form-label">Additional Note (optional)</label>
+                    <textarea class="form-control" id="responseNote" name="response" rows="3" placeholder="Please provide any additional information..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-custom">
+                    <i class="fas fa-paper-plane me-1"></i> Submit Response
+                </button>
+            </form>
+        </div>
+
+        <div class="mt-4">
+            <a href="/candidate/positions" class="btn btn-custom">
+                <i class="fas fa-briefcase me-1"></i> Browse More Positions
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                new bootstrap.Alert(alert).close();
+            });
+        }, 5000);
+    });
+</script>
+</body>
+</html>

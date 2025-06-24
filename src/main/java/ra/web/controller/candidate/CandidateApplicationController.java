@@ -1,71 +1,66 @@
+// CandidateApplicationController.java
 package ra.web.controller.candidate;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import ra.web.dto.candidate.ApplicationRequest;
+import ra.web.dto.PageDto;
+import ra.web.dto.candidate.CandidateApplicationDto;
 import ra.web.service.candidate.CandidateApplicationService;
 
 import javax.servlet.http.HttpSession;
 
 @Controller
-@RequestMapping("/candidate/positions/apply")
+@RequestMapping("/candidate/applications")
+@RequiredArgsConstructor
 public class CandidateApplicationController {
+    private final CandidateApplicationService applicationService;
+    private static final int DEFAULT_PAGE_SIZE = 3;
 
-    @Autowired
-    private CandidateApplicationService applicationService;
-
-    @GetMapping("/{positionId}")
-    public String showApplyForm(@PathVariable("positionId") Integer positionId,
-                                Model model,
-                                HttpSession session) {
+    @GetMapping
+    public String viewApplications(
+            @RequestParam(defaultValue = "1") int page,
+            HttpSession session,
+            Model model) {
         Integer candidateId = (Integer) session.getAttribute("candidateId");
         if (candidateId == null) {
             return "redirect:/login";
         }
 
-        // Kiểm tra positionId hợp lệ
-        if (positionId == null || positionId <= 0) {
-            return "redirect:/candidate/positions";
-        }
-
-        // Kiểm tra xem đã apply chưa
-        if (applicationService.isApplied(candidateId, positionId)) {
-            return "redirect:/candidate/positions/" + positionId;
-        }
-
-        // Tạo request object và set positionId
-        ApplicationRequest request = new ApplicationRequest();
-        request.setPositionId(positionId);
-
-        model.addAttribute("applicationRequest", request);
-        return "candidate/apply-form";
+        PageDto<CandidateApplicationDto> applications = applicationService.getApplications(candidateId, page, DEFAULT_PAGE_SIZE);
+        model.addAttribute("applications", applications);
+        return "candidate/applications/list";
     }
 
-    @PostMapping
-    public String submitApplication(@ModelAttribute("applicationRequest") ApplicationRequest request,
-                                    HttpSession session,
-                                    RedirectAttributes redirectAttributes) {
+    @GetMapping("/{id}")
+    public String viewApplicationDetails(
+            @PathVariable Integer id,
+            HttpSession session,
+            Model model) {
         Integer candidateId = (Integer) session.getAttribute("candidateId");
         if (candidateId == null) {
             return "redirect:/login";
         }
 
-        // Kiểm tra positionId hợp lệ
-        if (request.getPositionId() == null || request.getPositionId() <= 0) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Vị trí tuyển dụng không hợp lệ");
-            return "redirect:/candidate/positions";
+        CandidateApplicationDto application = applicationService.getApplicationDetails(id, candidateId);
+        model.addAttribute("application", application);
+        System.out.println("Application Details: " + application.getPositionName());
+        return "candidate/applications/detail";
+    }
+
+    @PostMapping("/{id}/confirm-interview")
+    public String handleInterviewConfirmation(
+            @PathVariable Integer id,
+            @RequestParam boolean isConfirmed,
+            @RequestParam(required = false) String response,
+            HttpSession session) {
+        Integer candidateId = (Integer) session.getAttribute("candidateId");
+        if (candidateId == null) {
+            return "redirect:/login";
         }
 
-        try {
-            applicationService.apply(candidateId, request.getPositionId(), request.getCvUrl());
-            redirectAttributes.addFlashAttribute("successMessage", "Nộp đơn thành công!");
-            return "redirect:/candidate/positions/" + request.getPositionId();
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Nộp đơn thất bại: " + e.getMessage());
-            return "redirect:/candidate/positions/apply/" + request.getPositionId();
-        }
+        applicationService.confirmInterview(id, candidateId, isConfirmed, response);
+        return "redirect:/candidate/applications/" + id;
     }
 }

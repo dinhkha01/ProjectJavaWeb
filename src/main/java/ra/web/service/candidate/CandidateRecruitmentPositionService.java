@@ -2,7 +2,7 @@ package ra.web.service.candidate;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ra.web.dao.candidate.CandidateApplicationDao;
+import ra.web.dao.candidate.CandidatePositionDao;
 import ra.web.dao.candidate.CandidateRecruitmentPositionDao;
 import ra.web.dto.candidate.CandidateRecruitmentPositionDto;
 import ra.web.entity.RecruitmentPosition;
@@ -17,7 +17,7 @@ public class CandidateRecruitmentPositionService {
     private CandidateRecruitmentPositionDao positionDao;
 
     @Autowired
-    private CandidateApplicationDao applicationDao;
+    private CandidatePositionDao applicationDao;
 
     public List<CandidateRecruitmentPositionDto> findActivePositions(int page, int size, String keyword, Integer candidateId) {
         return positionDao.findActivePositions(page, size, keyword).stream()
@@ -34,10 +34,8 @@ public class CandidateRecruitmentPositionService {
 
     public RecruitmentPosition findById(Integer id) {
         RecruitmentPosition position = positionDao.findById(id);
-
-        // Khởi tạo collection nếu cần thiết
         if (position != null && position.getTechnologies() != null) {
-            position.getTechnologies().size(); // Force initialize collection
+            position.getTechnologies().size();
         }
 
         return position;
