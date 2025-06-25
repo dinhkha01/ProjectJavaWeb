@@ -25,3 +25,13 @@ INSERT INTO application (candidateId, recruitmentPositionId, cvUrl, progress) VA
                                                                                   (3, 2, 'https://firebasestorage.googleapis.com/v0/b/khaa-4a9da.appspot.com/o/cvs%2F1733145300358-Diagram%20-%20Rikkei%20Job%20New.pdf?alt=media&token=40a9f0e1-0641-4994-b929-f1c1f4c159b1', 'interviewing'),
                                                                                   (3, 4, 'https://firebasestorage.googleapis.com/v0/b/khaa-4a9da.appspot.com/o/cvs%2F1733145300358-Diagram%20-%20Rikkei%20Job%20New.pdf?alt=media&token=40a9f0e1-0641-4994-b929-f1c1f4c159b1', 'pending'),
                                                                                   (3, 5, 'https://firebasestorage.googleapis.com/v0/b/khaa-4a9da.appspot.com/o/cvs%2F1733145300358-Diagram%20-%20Rikkei%20Job%20New.pdf?alt=media&token=40a9f0e1-0641-4994-b929-f1c1f4c159b1', 'done');
+
+
+-- Banrg Cong nghe
+INSERT INTO technology (name) VALUES
+                                  ('Java'),
+                                  ('C++'),
+                                  ('JavaScript'),
+                                  ('Python'),
+                                  ('React'),
+                                  ('Vue.js');
