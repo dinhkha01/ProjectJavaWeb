@@ -44,8 +44,8 @@ public class CandidateApplicationController {
         }
 
         CandidateApplicationDto application = applicationService.getApplicationDetails(id, candidateId);
-        model.addAttribute("application", application);
-        System.out.println("Application Details: " + application.getPositionName());
+        model.addAttribute("app", application);
+
         return "candidate/applications/detail";
     }
 

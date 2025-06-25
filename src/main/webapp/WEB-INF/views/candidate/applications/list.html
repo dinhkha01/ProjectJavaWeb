@@ -158,10 +158,10 @@
                         <td th:text="${app.positionName}"></td>
                         <td>
                                 <span th:switch="${app.progress.name()}" class="status-badge">
-                                    <span th:case="pending" class="status-pending">Pending</span>
-                                    <span th:case="handling" class="status-handling">Handling</span>
-                                    <span th:case="interviewing" class="status-interviewing">Interviewing</span>
-                                    <span th:case="done" class="status-done">Done</span>
+                             <span th:case="pending" class="status-pending">Chờ xử lý</span>
+                                <span th:case="handling" class="status-handling">Đang xử lý</span>
+                                <span th:case="interviewing" class="status-interviewing">Phỏng vấn</span>
+                                <span th:case="done" class="status-done">Hoàn thành</span>
                                 </span>
                         </td>
                         <td th:text="${app.createAt}"></td>

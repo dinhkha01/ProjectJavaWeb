@@ -16,4 +16,5 @@ public interface IApplicationDao {
     boolean moveToInterviewing(Integer id, LocalDateTime interviewRequestDate,
                                String interviewLink, LocalDateTime interviewTime);
     boolean updateInterviewResult(Integer id, String result, String note);
+    boolean updateApplication(Application application);
 }

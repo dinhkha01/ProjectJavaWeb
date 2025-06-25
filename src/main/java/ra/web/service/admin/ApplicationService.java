@@ -13,7 +13,6 @@ import ra.web.entity.Application.ProgressStatus;
 import java.time.LocalDateTime;
 
 @Service
-@Transactional
 public class ApplicationService {
 
     @Autowired
@@ -53,20 +52,20 @@ public class ApplicationService {
         }
         return application;
     }
-
+    @Transactional
     public boolean cancelApplication(Integer id, String reason) {
         return applicationDao.cancelApplication(id, reason);
     }
-
+    @Transactional
     public boolean viewApplication(Integer id) {
-        return applicationDao.updateToHandling(id);
+      return applicationDao.updateToHandling(id);
     }
-
+    @Transactional
     public boolean moveToInterviewing(Integer id, LocalDateTime interviewRequestDate,
                                       String interviewLink, LocalDateTime interviewTime) {
         return applicationDao.moveToInterviewing(id, interviewRequestDate, interviewLink, interviewTime);
     }
-
+    @Transactional
     public boolean updateInterviewResult(Integer id, String result, String note) {
         return applicationDao.updateInterviewResult(id, result, note);
     }

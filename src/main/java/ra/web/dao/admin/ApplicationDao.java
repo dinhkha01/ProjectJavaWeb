@@ -1,6 +1,7 @@
 package ra.web.dao.admin;
 
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import ra.web.dto.PageDto;
 import ra.web.dto.admin.ApplicationDto;
 import ra.web.entity.Application;
@@ -103,24 +104,7 @@ public class ApplicationDao implements IApplicationDao {
 
     @Override
     public Application findById(Integer id) {
-        try {
-            // Sử dụng JOIN FETCH để load luôn candidate và position
-            String jpql = "SELECT a FROM Application a " +
-                    "JOIN FETCH a.candidate c " +
-                    "JOIN FETCH a.recruitmentPosition rp " +
-                    "WHERE a.id = :id";
-
-            TypedQuery<Application> query = entityManager.createQuery(jpql, Application.class);
-            query.setParameter("id", id);
-
-            List<Application> results = query.getResultList();
-            return results.isEmpty() ? null : results.get(0);
-
-        } catch (Exception e) {
-            System.err.println("Error in findById with JOIN FETCH: " + e.getMessage());
-            // Fallback to simple find
-            return entityManager.find(Application.class, id);
-        }
+        return entityManager.find(Application.class,id);
     }
 
     @Override
@@ -136,9 +120,10 @@ public class ApplicationDao implements IApplicationDao {
     }
 
     @Override
+    @Transactional
     public boolean updateToHandling(Integer id) {
         Application application = findById(id);
-        if (application != null && application.getProgress() == ProgressStatus.pending) {
+        if (application != null ) {
             application.setProgress(ProgressStatus.handling);
             entityManager.merge(application);
             return true;
@@ -150,7 +135,7 @@ public class ApplicationDao implements IApplicationDao {
     public boolean moveToInterviewing(Integer id, LocalDateTime interviewRequestDate,
                                       String interviewLink, LocalDateTime interviewTime) {
         Application application = findById(id);
-        if (application != null && application.getProgress() == ProgressStatus.handling) {
+        if (application != null && application.getProgress() == ProgressStatus.pending) {
             application.setProgress(ProgressStatus.interviewing);
             application.setInterviewRequestDate(interviewRequestDate);
             application.setInterviewLink(interviewLink);
@@ -172,5 +157,11 @@ public class ApplicationDao implements IApplicationDao {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean updateApplication(Application application) {
+        entityManager.merge(application);
+        return true;
     }
 }

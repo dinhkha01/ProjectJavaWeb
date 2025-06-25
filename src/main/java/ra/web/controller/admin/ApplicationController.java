@@ -13,7 +13,7 @@ import ra.web.entity.Application.ProgressStatus;
 import ra.web.service.admin.ApplicationService;
 
 import java.time.LocalDateTime;
-
+import org.springframework.format.annotation.DateTimeFormat;
 @Controller
 @RequestMapping("/admin/applications")
 public class ApplicationController {
@@ -43,59 +43,27 @@ public class ApplicationController {
     }
 
     @GetMapping("/view/{id}")
-    @Transactional(readOnly = true) // Thêm readOnly = true để tối ưu
+    @Transactional(readOnly = true)
     public String viewApplication(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
-        try {
-            Application application = applicationService.findById(id);
-
-            // Kiểm tra null và validation
-            if (application == null) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Đơn ứng tuyển không tồn tại");
-                return "redirect:/admin/applications";
-            }
-
-            if (application.getDestroyAt() != null) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Đơn ứng tuyển đã bị huỷ");
-                return "redirect:/admin/applications";
-            }
-
-            // Debug logging
-            System.out.println("Application ID: " + application.getId());
-            System.out.println("Application Progress: " + application.getProgress());
-
-            // Kiểm tra candidate và position có null không
-            if (application.getCandidate() != null) {
-                System.out.println("Candidate Name: " + application.getCandidate().getName());
-                System.out.println("Candidate Email: " + application.getCandidate().getEmail());
-            } else {
-                System.out.println("Candidate is NULL!");
-            }
-
-            if (application.getRecruitmentPosition() != null) {
-                System.out.println("Position Name: " + application.getRecruitmentPosition().getName());
-            } else {
-                System.out.println("RecruitmentPosition is NULL!");
-            }
-
-            // Cập nhật trạng thái nếu cần
-            if (application.getProgress() == ProgressStatus.pending) {
-                applicationService.viewApplication(id);
-                // Refresh lại object sau khi update
-                application = applicationService.findById(id);
-            }
-
-            model.addAttribute("application", application);
-            return "admin/application/view";
-
-        } catch (Exception e) {
-            System.err.println("Error in viewApplication: " + e.getMessage());
-            e.printStackTrace();
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi tải dữ liệu đơn ứng tuyển");
+        Application application = applicationService.findById(id);
+        if (application == null || application.getDestroyAt() != null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Đơn ứng tuyển không tồn tại hoặc đã bị huỷ");
             return "redirect:/admin/applications";
         }
-    }
+        System.out.println("ban dau"+ application.getProgress());
+        if (application.getProgress() == ProgressStatus.pending) {
+            try {
+                applicationService.viewApplication(id);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("sau nay"+ application.getProgress());
 
-    @GetMapping("/cancel/{id}")
+        model.addAttribute("app", application);
+        return "admin/application/view";
+    }
+    @PostMapping("/cancel/{id}")
     public String cancelApplication(
             @PathVariable Integer id,
             @RequestParam String reason,
@@ -112,9 +80,9 @@ public class ApplicationController {
     @PostMapping("/interview/{id}")
     public String moveToInterviewing(
             @PathVariable Integer id,
-            @RequestParam LocalDateTime interviewRequestDate,
-            @RequestParam String interviewLink,
-            @RequestParam LocalDateTime interviewTime,
+            @RequestParam("interviewRequestDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime interviewRequestDate,
+            @RequestParam("interviewLink") String interviewLink,
+            @RequestParam("interviewTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime interviewTime,
             RedirectAttributes redirectAttributes) {
         boolean success = applicationService.moveToInterviewing(id, interviewRequestDate, interviewLink, interviewTime);
         if (success) {

@@ -167,18 +167,18 @@
                 <span class="info-label">
                     <i class="fas fa-briefcase text-primary"></i>Position
                 </span>
-                <span class="info-value" th:text="${application.positionName}"></span>
+                <span class="info-value" th:text="${app.positionName}"></span>
             </div>
             <div class="info-row">
                 <span class="info-label">
                     <i class="fas fa-info-circle text-primary"></i>Status
                 </span>
                 <span class="info-value">
-                    <span th:switch="${application.progress}" class="status-badge">
-                        <span th:case="pending" class="status-pending">Pending</span>
-                        <span th:case="handling" class="status-handling">Handling</span>
-                        <span th:case="interviewing" class="status-interviewing">Interviewing</span>
-                        <span th:case="done" class="status-done">Done</span>
+                    <span th:switch="${app.progress.name()}" class="status-badge">
+         <span th:case="pending" class="status-pending">Chờ xử lý</span>
+                                <span th:case="handling" class="status-handling">Đang xử lý</span>
+                                <span th:case="interviewing" class="status-interviewing">Phỏng vấn</span>
+                                <span th:case="done" class="status-done">Hoàn thành</span>
                     </span>
                 </span>
             </div>
@@ -186,40 +186,40 @@
                 <span class="info-label">
                     <i class="fas fa-calendar text-primary"></i>Applied Date
                 </span>
-                <span class="info-value" th:text="${#temporals.format(application.createAt, 'dd/MM/yyyy HH:mm')}"></span>
+                <span class="info-value" th:text="${app.createAt}"></span>
             </div>
         </div>
 
-        <div th:if="${application.interviewTime != null}" class="info-card">
+        <div th:if="${app.interviewTime != null}" class="info-card">
             <h5><i class="fas fa-calendar-check me-2"></i>Interview Information</h5>
             <div class="info-row">
                 <span class="info-label">
                     <i class="fas fa-clock text-primary"></i>Interview Time
                 </span>
-                <span class="info-value" th:text="${#temporals.format(application.interviewTime, 'dd/MM/yyyy HH:mm')}"></span>
+                <span class="info-value" th:text="${app.interviewTime}"></span>
             </div>
             <div class="info-row">
                 <span class="info-label">
                     <i class="fas fa-link text-primary"></i>Interview Link
                 </span>
                 <span class="info-value">
-                    <a th:if="${application.interviewLink}" th:href="${application.interviewLink}" target="_blank" th:text="${application.interviewLink}"></a>
-                    <span th:unless="${application.interviewLink}">Not provided yet</span>
+                    <a th:if="${app.interviewLink}" th:href="${app.interviewLink}" target="_blank" th:text="${app.interviewLink}"></a>
+                    <span th:unless="${app.interviewLink}">Not provided yet</span>
                 </span>
             </div>
-            <div th:if="${application.interviewRequestResult != null}" class="info-row">
+            <div th:if="${app.interviewResult != null}" class="info-row">
                 <span class="info-label">
                     <i class="fas fa-check-circle text-primary"></i>Your Response
                 </span>
-                <span class="info-value" th:text="${application.interviewRequestResult}"></span>
+                <span class="info-value" th:text="${app.interviewResult}"></span>
             </div>
         </div>
 
-        <div th:if="${application.canConfirmInterview}" class="interview-confirmation">
+        <div th:if="${app.canConfirmInterview}" class="interview-confirmation">
             <h5><i class="fas fa-question-circle me-2"></i>Interview Confirmation</h5>
             <p>You have been invited for an interview. Please confirm your availability:</p>
 
-            <form th:action="@{/candidate/applications/{id}/confirm-interview(id=${application.id})}" method="post" class="mt-3">
+            <form th:action="@{/candidate/applications/{id}/confirm-interview(id=${app.id})}" method="post" class="mt-3">
                 <div class="mb-3">
                     <div class="form-check">
                         <input class="form-check-input" type="radio" name="isConfirmed" id="confirmYes" value="true" required>
